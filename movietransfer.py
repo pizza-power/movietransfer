@@ -23,13 +23,13 @@ except configparser.NoSectionError:
 
     cfg_ini = open("config.ini", "w+")
     cfg_ini.write("[directories]\n")
-    cfg_ini.write("%s\n" % movies_dir)
-    cfg_ini.write("%s\n" % torrents_dir)
+    cfg_ini.write("movies_dir = %s\n" % movies_dir)
+    cfg_ini.write("torrents_dir = %s\n" % torrents_dir)
 
 # set dir to torrents directory
 os.chdir(torrents_dir)
 # list dirs/files in torrents directory
-listing = os.listdir(".")
+listing = os.listdir()
 # list to hold dirs
 dirs = []
 # list to hold files
