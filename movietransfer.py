@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import configparser
 import os
 from colorama import init, Fore, Back, Style
 import shutil
@@ -7,11 +8,26 @@ import unrar
 
 init(autoreset=True)
 
-# TODO make global variables loaded from a file with movie dir and torrents dir
-movies_dir = "/home/user/data2"
+# open a config file to read directory locations, or create the config file, if necessary
+try:
+    cfg = configparser.ConfigParser()
+    cfg.read("config.ini")
+    movies_dir = cfg.get("directories", "movies_dir")
+    torrents_dir = cfg.get("directories", "torrents_dir")
+
+except configparser.NoSectionError:
+    print("no config file found!")
+    print("Creating new config file...")
+    movies_dir = input("Please enter the movies directory: ")
+    torrents_dir = input("Please enter the torrents directory: ")
+
+    cfg_ini = open("config.ini", "w+")
+    cfg_ini.write("[directories]\n")
+    cfg_ini.write("%s\n" % movies_dir)
+    cfg_ini.write("%s\n" % torrents_dir)
 
 # set dir to torrents directory
-os.chdir("/home/user/data2/torrents")
+os.chdir(torrents_dir)
 # list dirs/files in torrents directory
 listing = os.listdir(".")
 # list to hold dirs
