@@ -8,36 +8,6 @@ import unrar
 
 init(autoreset=True)
 
-# open a config file to read directory locations, or create the config file, if necessary
-try:
-    cfg = configparser.ConfigParser()
-    cfg.read("config.ini")
-    movies_dir = cfg.get("directories", "movies_dir")
-    torrents_dir = cfg.get("directories", "torrents_dir")
-
-except configparser.NoSectionError:
-    print("no config file found!")
-    print("Creating new config file...")
-    movies_dir = input("Please enter the movies directory: ")
-    torrents_dir = input("Please enter the torrents directory: ")
-
-    cfg_ini = open("config.ini", "w+")
-    cfg_ini.write("[directories]\n")
-    cfg_ini.write("movies_dir = %s\n" % movies_dir)
-    cfg_ini.write("torrents_dir = %s\n" % torrents_dir)
-
-# set dir to torrents directory
-os.chdir(torrents_dir)
-# list dirs/files in torrents directory
-listing = os.listdir()
-# list to hold dirs
-dirs = []
-# list to hold files
-files = []
-
-print("\n")
-
-
 def print_list():
     for entry in listing:
         if entry[len(entry) - 4] == ".":
@@ -64,82 +34,72 @@ def copy_movie(file, name):
     print("file copied and renamed")
 
 
-print_list()
+if __name__ == "__main__":
+    # open a config file to read directory locations, or create the config file, if necessary
+    try:
+        cfg = configparser.ConfigParser()
+        cfg.read("config.ini")
+        movies_dir = cfg.get("directories", "movies_dir")
+        torrents_dir = cfg.get("directories", "torrents_dir")
 
-while True:
-    selection = input(Fore.CYAN + "Choose file/directory from the list, type list to see the list, or 'q' to "
-                                  "quit: ").lower()
+    except configparser.NoSectionError:
+        print("no config file found!")
+        print("Creating new config file...")
+        movies_dir = input("Please enter the movies directory: ")
+        torrents_dir = input("Please enter the torrents directory: ")
 
-    if selection == "list":
-        print_list()
-        print("\n")
-    elif selection == 'q':
-        print(Back.RED + "\n<---------- quitting! ---------->\n")
-        break
-    else:
-        print("\nYou Chose: " + listing[int(selection) - 1] + "\n")
-        choice = input("Is that correct? yes/no:  ").lower()
-        if choice == 'yes':
-            # do routine to create new directory, copy file, rename file
-            print("\nPlease type the new movie and directory name: ")
-            new_name = input()
-            print("You entered: " + new_name)
-            # TODO verify this is the correct choice before proceeding
+        cfg_ini = open("config.ini", "w+")
+        cfg_ini.write("[directories]\n")
+        cfg_ini.write("movies_dir = %s\n" % movies_dir)
+        cfg_ini.write("torrents_dir = %s\n" % torrents_dir)
 
-            # if name in dir list cd into dir and extract
+    # set dir to torrents directory
+    os.chdir(torrents_dir)
+    # list dirs/files in torrents directory
+    listing = os.listdir()
+    # list to hold dirs
+    dirs = []
+    # list to hold files
+    files = []
 
-            # in name in files list, move etc
-            make_movie_dir(new_name)
+    print("\n")
 
-            # copy movie to new dir
-            # temp file name for development
-            old_file = "pizza.mkv"
-            copy_movie(old_file, new_name)
+    print_list()
 
-        elif choice == 'no':
-            print("chose again")
+    while True:
+        selection = input(Fore.CYAN + "Choose file/directory from the list, type list to see the list, or 'q' to "
+                                      "quit: ").lower()
+
+        if selection == "list":
+            print_list()
+            print("\n")
+        elif selection == 'q':
+            print(Back.RED + "\n<---------- quitting! ---------->\n")
+            break
         else:
-            print("Please type 'yes' or 'no'\n")
+            print("\nYou Chose: " + listing[int(selection) - 1] + "\n")
+            choice = input("Is that correct? yes/no:  ").lower()
+            if choice == 'yes':
+                # do routine to create new directory, copy file, rename file
+                print("\nPlease type the new movie and directory name: ")
+                new_name = input()
+                print("You entered: " + new_name)
+                # TODO verify this is the correct choice before proceeding
 
-# TODO multithread/process this
+                # if name in dir list cd into dir and extract
 
+                # in name in files list, move etc
+                make_movie_dir(new_name)
 
-    # if file
-    # ask to rename, search movies dir for dir that already has name
-    # if dir not found, create dir
-    # copy file to new dir, ask to delete when done
-    # if dir
-    # chdir
-    # search for files rars etc
-    # if find movie file already present
-    # ask if correct
-    # rename
-    # check and create dir in movies dir
-    # copy file
-    # ask to delete
-    # if rar found
-    # unrar, ask to verify
-    # when unrar done, print success or not
-    # search for file to rename
-    # ask to rename
-    # search movies for dir with this name
-    # create dir if not present
-    # copy file
-    # ask to delete
+                # copy movie to new dir
+                # temp file name for development
+                old_file = "pizza.mkv"
+                copy_movie(old_file, new_name)
 
-# print("\n\n")
-# print("Directories: ")
-# print(dirs)
-# print("\n")
-# print("Files: ")
-# print(files)
+            elif choice == 'no':
+                print("chose again")
+            else:
+                print("Please type 'yes' or 'no'\n")
 
-# Search dirs for mkv, avi, mp4
-# if found, ask if this is what you are looking for
-
-
-# rename file to user entered NAME
-
-# mkdir in /home/user/data/movies/NAME
-
-# copy file to /home/user/data/movies/NAME
+# TODO: create transfer class, and multithread/multiprocess each instance to get more going at one time
+# TODO: input validation needed at multiple points
