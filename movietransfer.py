@@ -112,8 +112,10 @@ if __name__ == "__main__":
                 # in name in files list, move etc
                 else:
                     new_name = input()
+                    old_file = listing[int(selection) - 1]
+                    print("old file is: %s" % old_file)
+                    print("making new dir and copying file")
                     make_movie_dir(new_name)
-                    old_file = "../pizza.mkv"
                     copy_movie(old_file, new_name)
 
             elif choice == 'no':
