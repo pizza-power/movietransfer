@@ -4,11 +4,13 @@ import configparser
 import os
 from colorama import init, Fore, Back, Style
 import shutil
-import unrar
+from unrar import rarfile
 
 init(autoreset=True)
 
+
 def print_list():
+    # this is calling a variable from different scope, not good
     for entry in listing:
         if entry[len(entry) - 4] == ".":
             print("\t" + Fore.RED + str(listing.index(entry) + 1) + ": " + entry)
@@ -79,27 +81,42 @@ if __name__ == "__main__":
         else:
             print("\nYou Chose: " + listing[int(selection) - 1] + "\n")
             choice = input("Is that correct? yes/no:  ").lower()
-            if choice == 'yes':
-                # do routine to create new directory, copy file, rename file
-                print("\nPlease type the new movie and directory name: ")
-                new_name = input()
-                print("You entered: " + new_name)
-                # TODO verify this is the correct choice before proceeding
 
+            if choice == 'yes':
                 # if name in dir list cd into dir and extract
+                if listing[int(selection) - 1] in dirs:
+                    os.chdir(listing[int(selection) - 1])
+                    # create a listing of the directory and find the rar file
+                    dir_list = os.listdir()
+                    for entry in dir_list:
+                        if entry[len(entry) - 4:] == ".rar":
+                            print("Extracting...")
+                            rar = rarfile.RarFile(entry)
+                            rar.extractall()
+                            # TODO check for extraction errors, etc?
+                            print("extraction finished\n")
+                    print("\nPlease type the new movie and directory name: ")
+                    new_name = input()
+                    print("You entered: " + new_name)
+                    make_movie_dir(new_name)
+
+                    # rereun dir list to find mkv, can probably increase efficiency here
+                    dir_list = os.listdir()
+                    for entry in dir_list:
+                        if entry[len(entry) - 4:] == ".mkv":
+                            old_file = entry
+                            print(entry)
+
+                    copy_movie(old_file, new_name)
 
                 # in name in files list, move etc
-                make_movie_dir(new_name)
-
-                # copy movie to new dir
-                # temp file name for development
-                old_file = "pizza.mkv"
-                copy_movie(old_file, new_name)
+                else:
+                    new_name = input()
+                    make_movie_dir(new_name)
+                    old_file = "../pizza.mkv"
+                    copy_movie(old_file, new_name)
 
             elif choice == 'no':
                 print("chose again")
             else:
                 print("Please type 'yes' or 'no'\n")
-
-# TODO: create transfer class, and multithread/multiprocess each instance to get more going at one time
-# TODO: input validation needed at multiple points
