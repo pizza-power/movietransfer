@@ -1,0 +1,11 @@
+download src
+un gzip
+unrar 
+cd unrar
+make lib
+sudo make install-lib
+
+sudo cp libunrar.so /usr/lib/libunrar.so
+
+export UNRAR_LIB_PATH=/usr/lib/libunrar.so
+

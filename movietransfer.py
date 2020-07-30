@@ -10,7 +10,8 @@ init(autoreset=True)
 
 
 def print_list():
-    # this is calling a variable from different scope, not good
+    # this is calling a variable from different scope, probably should change
+    print("\n")
     for entry in listing:
         if entry[len(entry) - 4] == ".":
             print("\t" + Fore.RED + str(listing.index(entry) + 1) + ": " + entry)
@@ -22,7 +23,6 @@ def print_list():
 
 
 def make_movie_dir(name):
-    print("new movie dir name is: " + name)
     try:
         path = os.path.join(movies_dir, name)
         os.mkdir(path)
@@ -31,9 +31,9 @@ def make_movie_dir(name):
 
 
 def copy_movie(file, name):
-    print(movies_dir + name)
     shutil.copy2(file, movies_dir + "/" + name)
-    print("file copied and renamed")
+    os.rename(movies_dir + "/" + name + "/" + file, movies_dir + "/" + name + "/" + name + ".mkv")
+    print("\n\t" + Fore.GREEN + "[+] file copied and renamed\n")
 
 
 if __name__ == "__main__":
@@ -64,11 +64,10 @@ if __name__ == "__main__":
     # list to hold files
     files = []
 
-    print("\n")
-
     print_list()
 
     while True:
+        # TODO during reslect after doing one operation, this fails because directories haven't been reset?
         selection = input(Fore.CYAN + "Choose file/directory from the list, type list to see the list, or 'q' to "
                                       "quit: ").lower()
 
@@ -95,19 +94,18 @@ if __name__ == "__main__":
                             rar.extractall()
                             # TODO check for extraction errors, etc?
                             print("extraction finished\n")
-                    print("\nPlease type the new movie and directory name: ")
-                    new_name = input()
-                    print("You entered: " + new_name)
+                    new_name = input("\nPlease type the new movie and directory name: ")
+                    print("\n\tperforming actions\n")
                     make_movie_dir(new_name)
 
-                    # rereun dir list to find mkv, can probably increase efficiency here
+                    # rerun dir list to find mkv, can probably increase efficiency here by using some sort of list
+                    # comparison or something?
                     dir_list = os.listdir()
                     for entry in dir_list:
                         if entry[len(entry) - 4:] == ".mkv":
                             old_file = entry
-                            print(entry)
-
-                    copy_movie(old_file, new_name)
+                            copy_movie(old_file, new_name)
+                            # TODO the above does not rename the file for some reason, but does copy properly
 
                 # in name in files list, move etc
                 else:
