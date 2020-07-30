@@ -108,7 +108,7 @@ if __name__ == "__main__":
         # send to movie operations class
 
         # TODO add support for mp4, avi, etc, find list of video types online and search list?
-
+        # test
         # TODO during reslect after doing one operation, this fails because directories haven't been reset?
         selection = input(Fore.CYAN + "Choose file/directory from the list, type list to see the list, or 'q' to "
                                       "quit: ").lower()
