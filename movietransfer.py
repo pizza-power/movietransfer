@@ -22,18 +22,55 @@ def print_list():
     print("\n")
 
 
-def make_movie_dir(name):
-    try:
-        path = os.path.join(movies_dir, name)
-        os.mkdir(path)
-    except FileExistsError:
-        print("directory already exists")
-
-
 def copy_movie(file, name):
     shutil.copy2(file, movies_dir + "/" + name)
     os.rename(movies_dir + "/" + name + "/" + file, movies_dir + "/" + name + "/" + name + ".mkv")
     print("\n\t" + Fore.GREEN + "[+] file copied and renamed\n")
+
+
+def positive_outcome(text: str):
+    print(Fore.GREEN + "\t[+] " + Style.RESET_ALL + text)
+
+
+def negative_outcome(text: str):
+    print(Fore.RED + "\t[+] " + Style.RESET_ALL + text)
+
+
+class MovieOperations:
+    """A class for a file transfer including unrar'ing, renaming, making directories, etc"""
+
+    def __init__(self, original_file_name):
+        self.original_file_name = original_file_name
+
+    @staticmethod
+    def get_new_name():
+        new_name = input("\nPlease type the new movie and directory name: ")
+        return new_name
+
+    @staticmethod
+    def make_movie_dir(new_name):
+        try:
+            path = os.path.join(movies_dir, new_name)
+            os.mkdir(path)
+            positive_outcome(path + " created!")
+        except FileExistsError:
+            negative_outcome("directory already exists!")
+
+    @staticmethod
+    def unrar_movie(movie_to_unrar):
+        try:
+            rar = rarfile.RarFile(movie_to_unrar)
+            rar.extractall()
+            positive_outcome("Successfully extracted!")
+        except:
+            negative_outcome("Exception has occurred!")
+
+    @staticmethod
+    def copy_movie(movie_name: str):
+        try:
+            shutil.copy2(movie_name, movies_dir + "/" + name)
+        except:
+            negative_outcome("An error has occurred!")
 
 
 if __name__ == "__main__":
@@ -67,6 +104,11 @@ if __name__ == "__main__":
     print_list()
 
     while True:
+        # TODO create a "file locator" method to traverse choices and find a file, return file name to
+        # send to movie operations class
+
+        # TODO add support for mp4, avi, etc, find list of video types online and search list?
+
         # TODO during reslect after doing one operation, this fails because directories haven't been reset?
         selection = input(Fore.CYAN + "Choose file/directory from the list, type list to see the list, or 'q' to "
                                       "quit: ").lower()
@@ -89,11 +131,10 @@ if __name__ == "__main__":
                     dir_list = os.listdir()
                     for entry in dir_list:
                         if entry[len(entry) - 4:] == ".rar":
-                            print("Extracting...")
-                            rar = rarfile.RarFile(entry)
-                            rar.extractall()
-                            # TODO check for extraction errors, etc?
-                            print("extraction finished\n")
+                            # extract with unrar
+                            movie_to_transfer = MovieOperations(entry)
+                            movie_to_transfer.unrar_movie(movie_to_transfer.original_file_name)
+
                     new_name = input("\nPlease type the new movie and directory name: ")
                     print("\n\tperforming actions\n")
                     make_movie_dir(new_name)
@@ -105,7 +146,6 @@ if __name__ == "__main__":
                         if entry[len(entry) - 4:] == ".mkv":
                             old_file = entry
                             copy_movie(old_file, new_name)
-                            # TODO the above does not rename the file for some reason, but does copy properly
 
                 # in name in files list, move etc
                 else:
