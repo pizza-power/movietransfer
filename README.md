@@ -12,9 +12,21 @@ The torrent dir is listed, and the user can select a file or directory. If the u
 
 If the user selects a dir containing rar files, the rar is unrar'd and then copied and renamed
 
+Installing UNRAR Libary on Linux: 
+
+download source code
+uncompress and untar it
+$cd unrar
+$make lib
+$sudo make install-lib
+$sudo cp libunrar.so /usr/lib/libunrar.so
+$export UNRAR_LIB_PATH=/usr/lib/libunrar.so
+
 TODO: 
 
 Create a Transfer class to use in Multiprocessing
 Multiprocessing would come in handy when unraring is occuring
 Input validation/invalid characters in dir names
 More error catching needed
+
+
