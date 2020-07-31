@@ -10,35 +10,49 @@ init(autoreset=True)
 
 
 def new_print_dir(dirname: str):
+    """
+    lists items in directory, and if the item is a file, it will print in red,
+    if item is a directory, it will print in white
+    :param dirname:
+    """
     ls = os.listdir(dirname)
-    for entry in ls:
-        if entry[len(entry) - 4] == ".":
-            print("\t" + Fore.RED + str(listing.index(entry) + 1) + ": " + entry)
-            files.append(entry)
+    for item in ls:
+        if item[len(item) - 4] == ".":
+            print("\t" + Fore.RED + str(listing.index(item) + 1) + ": " + item)
+            files.append(item)
         else:
-            print("\t" + str(listing.index(entry) + 1) + ": " + entry)
-            dirs.append(entry)
+            print("\t" + str(listing.index(item) + 1) + ": " + item)
+            dirs.append(item)
 
 
 def positive_outcome(text: str):
+    """
+    :param text: function to print a green plus sign in brackets if the outcome
+    of whatever code is favorable
+    """
     print(Fore.GREEN + "\t[+] " + Style.RESET_ALL + text)
 
 
 def negative_outcome(text: str):
-    print(Fore.RED + "\t[+] " + Style.RESET_ALL + text)
+    """
+    :param text: function to print a red minus sign in brackets if the outcome
+    of whatever code is not favorable
+    """
+    print(Fore.RED + "\t[-] " + Style.RESET_ALL + text)
 
 
 class MovieOperations:
-    """A class for a file transfer including unrar'ing, renaming, making directories, etc"""
+    """A class for a file transfer including unraring, renaming, making
+    directories, etc"""
 
     def __init__(self, original_file_name):
         self.original_file_name = original_file_name
 
     @staticmethod
     def get_new_name():
-        new_name = input("\nPlease type the new movie and directory name: ")
+        name = input("\nPlease type the new movie and directory name: ")
         print("\n")
-        return new_name
+        return name
 
     @staticmethod
     def make_movie_dir(new_directory_name):
@@ -50,7 +64,7 @@ class MovieOperations:
             negative_outcome("directory already exists!")
 
     @staticmethod
-    def unrar_movie(movie_to_unrar):
+    def unrar_movie(movie_to_unrar: str):
         try:
             rar = rarfile.RarFile(movie_to_unrar)
             rar.extractall()
@@ -59,25 +73,29 @@ class MovieOperations:
             negative_outcome("Exception has occurred!")
 
     @staticmethod
-    def copy_movie(orig_movie_name: str, new_file_name):
+    def copy_movie(orig_movie_name: str, new_file_name: str):
         try:
             shutil.copy2(orig_movie_name, movies_dir + "/" + new_file_name)
             positive_outcome("Movie copied!")
         except:
             negative_outcome("An error has occurred during copying!")
 
-    def rename_movie(self, original_name: str, new_dir_and_file_name: str):
+    @staticmethod
+    def rename_movie(original_name: str, new_dir_and_file_name: str):
         # new_dir_and_file_name = self.get_new_name()
         try:
-            os.rename(movies_dir + "/" + new_dir_and_file_name + "/" + original_name,
-                      movies_dir + "/" + new_dir_and_file_name + "/" + new_dir_and_file_name + ".mkv")
+            os.rename(movies_dir + "/" + new_dir_and_file_name + "/" +
+                      original_name,
+                      movies_dir + "/" + new_dir_and_file_name + "/" +
+                      new_dir_and_file_name + ".mkv")
             positive_outcome("File has been renamed")
         except FileExistsError:
             negative_outcome("Directory/File already exists!")
 
 
 if __name__ == "__main__":
-    # open a config file to read directory locations, or create the config file, if necessary
+    # open a config file to read directory locations, or create the
+    # config file, if necessary
     try:
         cfg = configparser.ConfigParser()
         cfg.read("config.ini")
@@ -106,13 +124,15 @@ if __name__ == "__main__":
     new_print_dir(os.getcwd())
 
     while True:
-        # TODO create a "file locator" method to traverse choices and find a file, return file name to
-        # send to movie operations class
-        # TODO add support for mp4, avi, etc, find list of video types online and search list?
+        # TODO create a "file locator" method to traverse choices and find a
+        #  file, return file name to send to movie operations class
+        # TODO add support for mp4, avi, etc, find list of video types online
+        #  and search list?
         # video_file_type_list = ["mkv", "avi", "mp4"]
         os.chdir(torrents_dir)
 
-        selection = input(Fore.CYAN + "Choose file/directory from the list, type list to see the list, or 'q' to "
+        selection = input(Fore.CYAN + "Choose file/directory from the list, "
+                                      "type list to see the list, or 'q' to "
                                       "quit: ").lower()
         # TODO input validation, errors here depending on entry
         if selection == "list":
@@ -134,7 +154,8 @@ if __name__ == "__main__":
                         if entry[len(entry) - 4:] == ".rar":
                             # extract with unrar
                             movie_object = MovieOperations(entry)
-                            movie_object.unrar_movie(movie_object.original_file_name)
+                            movie_object.unrar_movie(movie_object.
+                                                     original_file_name)
 
                     new_dir_list = os.listdir()
                     for entry in new_dir_list:
@@ -142,7 +163,6 @@ if __name__ == "__main__":
                             movie_object = MovieOperations(entry)
                             new_name = movie_object.get_new_name()
                             movie_object.make_movie_dir(new_name)
-                            # todo different name for entry?
                             movie_object.copy_movie(entry, new_name)
                             movie_object.rename_movie(entry, new_name)
 
