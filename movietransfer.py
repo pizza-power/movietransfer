@@ -9,23 +9,15 @@ from unrar import rarfile
 init(autoreset=True)
 
 
-def print_list():
-    # this is calling a variable from different scope, probably should change
-    print("\n")
-    for entry in listing:
+def new_print_dir(dirname: str):
+    ls = os.listdir(dirname)
+    for entry in ls:
         if entry[len(entry) - 4] == ".":
             print("\t" + Fore.RED + str(listing.index(entry) + 1) + ": " + entry)
             files.append(entry)
         else:
             print("\t" + str(listing.index(entry) + 1) + ": " + entry)
             dirs.append(entry)
-    print("\n")
-
-
-def copy_movie(file, name):
-    shutil.copy2(file, movies_dir + "/" + name)
-    os.rename(movies_dir + "/" + name + "/" + file, movies_dir + "/" + name + "/" + name + ".mkv")
-    print("\n\t" + Fore.GREEN + "[+] file copied and renamed\n")
 
 
 def positive_outcome(text: str):
@@ -45,12 +37,13 @@ class MovieOperations:
     @staticmethod
     def get_new_name():
         new_name = input("\nPlease type the new movie and directory name: ")
+        print("\n")
         return new_name
 
     @staticmethod
-    def make_movie_dir(new_name):
+    def make_movie_dir(new_directory_name):
         try:
-            path = os.path.join(movies_dir, new_name)
+            path = os.path.join(movies_dir, new_directory_name)
             os.mkdir(path)
             positive_outcome(path + " created!")
         except FileExistsError:
@@ -66,11 +59,21 @@ class MovieOperations:
             negative_outcome("Exception has occurred!")
 
     @staticmethod
-    def copy_movie(movie_name: str):
+    def copy_movie(orig_movie_name: str, new_file_name):
         try:
-            shutil.copy2(movie_name, movies_dir + "/" + name)
+            shutil.copy2(orig_movie_name, movies_dir + "/" + new_file_name)
+            positive_outcome("Movie copied!")
         except:
-            negative_outcome("An error has occurred!")
+            negative_outcome("An error has occurred during copying!")
+
+    def rename_movie(self, original_name: str, new_dir_and_file_name: str):
+        # new_dir_and_file_name = self.get_new_name()
+        try:
+            os.rename(movies_dir + "/" + new_dir_and_file_name + "/" + original_name,
+                      movies_dir + "/" + new_dir_and_file_name + "/" + new_dir_and_file_name + ".mkv")
+            positive_outcome("File has been renamed")
+        except FileExistsError:
+            negative_outcome("Directory/File already exists!")
 
 
 if __name__ == "__main__":
@@ -86,7 +89,6 @@ if __name__ == "__main__":
         print("Creating new config file...")
         movies_dir = input("Please enter the movies directory: ")
         torrents_dir = input("Please enter the torrents directory: ")
-
         cfg_ini = open("config.ini", "w+")
         cfg_ini.write("[directories]\n")
         cfg_ini.write("movies_dir = %s\n" % movies_dir)
@@ -101,22 +103,21 @@ if __name__ == "__main__":
     # list to hold files
     files = []
 
-    print_list()
+    new_print_dir(os.getcwd())
 
     while True:
         # TODO create a "file locator" method to traverse choices and find a file, return file name to
         # send to movie operations class
-
         # TODO add support for mp4, avi, etc, find list of video types online and search list?
-        # test
-        # TODO during reslect after doing one operation, this fails because directories haven't been reset?
+        # video_file_type_list = ["mkv", "avi", "mp4"]
+        os.chdir(torrents_dir)
+
         selection = input(Fore.CYAN + "Choose file/directory from the list, type list to see the list, or 'q' to "
                                       "quit: ").lower()
-
+        # TODO input validation, errors here depending on entry
         if selection == "list":
-            print_list()
-            print("\n")
-        elif selection == 'q':
+            new_print_dir(os.getcwd())
+        elif selection in ['q', 'quit', 'qui', 'qu']:
             print(Back.RED + "\n<---------- quitting! ---------->\n")
             break
         else:
@@ -132,31 +133,31 @@ if __name__ == "__main__":
                     for entry in dir_list:
                         if entry[len(entry) - 4:] == ".rar":
                             # extract with unrar
-                            movie_to_transfer = MovieOperations(entry)
-                            movie_to_transfer.unrar_movie(movie_to_transfer.original_file_name)
+                            movie_object = MovieOperations(entry)
+                            movie_object.unrar_movie(movie_object.original_file_name)
 
-                    new_name = input("\nPlease type the new movie and directory name: ")
-                    print("\n\tperforming actions\n")
-                    make_movie_dir(new_name)
-
-                    # rerun dir list to find mkv, can probably increase efficiency here by using some sort of list
-                    # comparison or something?
-                    dir_list = os.listdir()
-                    for entry in dir_list:
+                    new_dir_list = os.listdir()
+                    for entry in new_dir_list:
                         if entry[len(entry) - 4:] == ".mkv":
-                            old_file = entry
-                            copy_movie(old_file, new_name)
+                            movie_object = MovieOperations(entry)
+                            new_name = movie_object.get_new_name()
+                            movie_object.make_movie_dir(new_name)
+                            # todo different name for entry?
+                            movie_object.copy_movie(entry, new_name)
+                            movie_object.rename_movie(entry, new_name)
 
                 # in name in files list, move etc
                 else:
-                    new_name = input()
-                    old_file = listing[int(selection) - 1]
-                    print("old file is: %s" % old_file)
-                    print("making new dir and copying file")
-                    make_movie_dir(new_name)
-                    copy_movie(old_file, new_name)
+                    file = listing[int(selection) - 1]
+                    movie_object = MovieOperations(file)
+                    new_name = movie_object.get_new_name()
+                    movie_object.make_movie_dir(new_name)
+                    movie_object.copy_movie(file, new_name)
+                    movie_object.rename_movie(file, new_name)
+                    os.chdir(torrents_dir)
 
             elif choice == 'no':
-                print("chose again")
+                print("choose again")
+
             else:
                 print("Please type 'yes' or 'no'\n")
